@@ -60,7 +60,11 @@ function addName(name) {
     return { notDrawn: names.notDrawn, drawn: names.drawn };
 }
 
-app.use(cors())
+const corsOptions = {
+  origin: ['http://localhost:3000', 'front-prod']
+};
+
+app.use(cors(corsOptions));
 
 app.get('/draw', (req, res) => {
   const winner = drawWinner();
