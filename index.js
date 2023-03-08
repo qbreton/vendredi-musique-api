@@ -89,7 +89,7 @@ function deleteNames(name) {
 }
 
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://qbreton.github.io/vendredi-musique-front/']
+  origin: ['http://localhost:3000', 'https://qbreton.github.io']
 };
 
 app.use(cors(corsOptions));
