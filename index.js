@@ -61,6 +61,18 @@ function addName(name) {
     return { notDrawn: names.notDrawn, drawn: names.drawn };
 }
 
+function resetNames() {
+  // lire le fichier names.json
+  const filePath = path.join(__dirname, 'names.json');
+  const names = JSON.parse(fs.readFileSync(filePath));
+
+  const newList = { notDrawn: names.drawn.concat(names.notDrawn), drawn: []};
+  // écrire les données dans le fichier names.json
+  fs.writeFileSync(filePath, JSON.stringify(newList));
+
+  return newList;
+}
+
 const corsOptions = {
   origin: ['http://localhost:3000', 'front-prod']
 };
@@ -69,7 +81,7 @@ app.use(cors(corsOptions));
 
 app.get('/draw', (req, res) => {
   const list = drawWinner();
-  res.json({ list });
+  res.json(list);
 });
 
 app.get('/names', (req, res) => {
@@ -85,6 +97,11 @@ app.post('/names', jsonParser, (req, res) => {
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
+});
+
+app.post('/reset', (req, res) => {
+  const { notDrawn, drawn } = resetNames();
+  res.json({ notDrawn, drawn });
 });
 
 app.listen(port, () => {
