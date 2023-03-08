@@ -68,8 +68,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.get('/draw', (req, res) => {
-  const winner = drawWinner();
-  res.json({ winner });
+  const list = drawWinner();
+  res.json({ list });
 });
 
 app.get('/names', (req, res) => {

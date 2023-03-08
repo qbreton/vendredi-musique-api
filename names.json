@@ -1,1 +1,11 @@
-{"notDrawn":["Clems","Olivier","Bastien","Quentin","Ruben"],"drawn":[]}
+{
+  "notDrawn": [
+    "Olivier",
+    "Bastien"
+  ],
+  "drawn": [
+    "Clems",
+    "Quentin",
+    "Ruben"
+  ]
+}
