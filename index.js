@@ -73,6 +73,21 @@ function resetNames() {
   return newList;
 }
 
+function deleteNames(name) {
+  const filePath = path.join(__dirname, 'names.json');
+  const names = JSON.parse(fs.readFileSync(filePath));
+
+  const notDrawn = names.notDrawn.filter((n) => n !== name);
+  const drawn = names.drawn.filter((n) => n !== name);
+
+  names.notDrawn = notDrawn;
+  names.drawn = drawn;
+
+  fs.writeFileSync(filePath, JSON.stringify(names));
+  
+  return names;
+}
+
 const corsOptions = {
   origin: ['http://localhost:3000', 'front-prod']
 };
@@ -97,6 +112,10 @@ app.post('/names', jsonParser, (req, res) => {
     } catch (err) {
       res.status(400).json({ message: err.message });
     }
+});
+
+app.delete('/names/:name', (req, res) => {
+  res.json(deleteNames(req.params.name))
 });
 
 app.post('/reset', (req, res) => {
