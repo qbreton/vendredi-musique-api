@@ -26,7 +26,7 @@ function drawWinner() {
   const data = JSON.stringify(names, null, 2);
   fs.writeFileSync(filePath, data);
 
-  return winner;
+  return names;
 }
 
 function getDrawnAndNotDrawn() {
