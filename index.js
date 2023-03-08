@@ -60,6 +60,8 @@ function addName(name) {
     return { notDrawn: names.notDrawn, drawn: names.drawn };
 }
 
+app.use(cors())
+
 app.get('/draw', (req, res) => {
   const winner = drawWinner();
   res.json({ winner });
