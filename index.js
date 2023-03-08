@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const fs = require('fs');
 const path = require('path');
+const port = process.env.PORT || 3000;
 
 function drawWinner() {
   // lire le fichier names.json
@@ -48,6 +49,6 @@ app.get('/names', (req, res) => {
     res.json({ notDrawn, drawn });
 });
 
-app.listen(3001, () => {
+app.listen(port, () => {
   console.log('API is running on port 3001');
 });
