@@ -5,6 +5,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const port = process.env.PORT || 3000;
+const cors = require('cors');
 
 function drawWinner() {
   // lire le fichier names.json
