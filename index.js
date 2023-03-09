@@ -14,9 +14,11 @@ function drawWinner() {
 
   // choisir un nom au hasard parmi ceux qui n'ont pas encore été tirés
   const notDrawn = names.notDrawn;
+  if (notDrawn.length === 0) { return; }
   const drawn = names.drawn;
   const winnerIndex = Math.floor(Math.random() * notDrawn.length);
-  const winner = notDrawn[winnerIndex];
+  let winner = notDrawn[winnerIndex];
+  winner.dates.push(new Date().toISOString().slice(0, 10));
 
   // mettre à jour les tableaux "notDrawn" et "drawn"
   notDrawn.splice(winnerIndex, 1);
@@ -48,12 +50,15 @@ function addName(name) {
     const names = JSON.parse(fs.readFileSync(filePath));
 
     // vérifier si le nom existe déjà
-    if (names.notDrawn.includes(name) || names.drawn.includes(name)) {
-    throw new Error(`Le nom ${name} existe déjà.`);
+    const existsCondition = (person) => person.name === name;
+    const nameExists = names.notDrawn.some(existsCondition)
+      || names.drawn.some(existsCondition);
+    if (nameExists) {
+      throw new Error(`Le nom ${name} existe déjà.`);
     }
 
     // ajouter le nom à la liste "notDrawn"
-    names.notDrawn.push(name);
+    names.notDrawn.push({name, dates: []});
 
     // écrire les données dans le fichier names.json
     fs.writeFileSync(filePath, JSON.stringify(names));
@@ -65,8 +70,9 @@ function resetNames() {
   // lire le fichier names.json
   const filePath = path.join(__dirname, 'names.json');
   const names = JSON.parse(fs.readFileSync(filePath));
+  const concat = (...arrays) => [].concat(...arrays.filter(Array.isArray));
 
-  const newList = { notDrawn: names.drawn.concat(names.notDrawn), drawn: []};
+  const newList = { notDrawn: concat(names.notDrawn, names.drawn), drawn: []};
   // écrire les données dans le fichier names.json
   fs.writeFileSync(filePath, JSON.stringify(newList));
 
@@ -77,8 +83,8 @@ function deleteNames(name) {
   const filePath = path.join(__dirname, 'names.json');
   const names = JSON.parse(fs.readFileSync(filePath));
 
-  const notDrawn = names.notDrawn.filter((n) => n !== name);
-  const drawn = names.drawn.filter((n) => n !== name);
+  const notDrawn = names.notDrawn.filter((n) => n.name !== name);
+  const drawn = names.drawn.filter((n) => n.name !== name);
 
   names.notDrawn = notDrawn;
   names.drawn = drawn;
@@ -89,10 +95,10 @@ function deleteNames(name) {
 }
 
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://qbreton.github.io']
+  origin: ['http://localhost:3000', 'http://localhost:3001/vendredi-musique-front', 'https://qbreton.github.io']
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.get('/draw', (req, res) => {
   const list = drawWinner();
