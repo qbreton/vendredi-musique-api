@@ -94,6 +94,26 @@ function deleteNames(name) {
   return names;
 }
 
+function undo(name) {
+  if (name === "") { return; }
+  // lire le fichier names.json
+  const filePath = path.join(__dirname, 'names.json');
+  const names = JSON.parse(fs.readFileSync(filePath));
+
+  names.drawn.map((person, index) => {
+    if (person.name === name && person.dates.length > 0) {
+      person.dates.pop();
+      const personToMove = names.drawn.splice(index, 1)[0];
+      names.notDrawn.push(personToMove);
+    }
+  });
+
+  // écrire les données dans le fichier names.json
+  fs.writeFileSync(filePath, JSON.stringify(names));
+
+  return names;
+}
+
 const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:3001/vendredi-musique-front', 'https://qbreton.github.io']
 };
@@ -122,6 +142,10 @@ app.post('/names', jsonParser, (req, res) => {
 
 app.delete('/names/:name', (req, res) => {
   res.json(deleteNames(req.params.name))
+});
+
+app.post('/:name/undo', (req, res) => {
+  res.json(undo(req.params.name))
 });
 
 app.post('/reset', (req, res) => {
