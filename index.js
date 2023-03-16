@@ -4,8 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { expressjwt } = require('express-jwt');
+require('dotenv').config();
 
 function drawWinner() {
   // lire le fichier names.json
@@ -114,17 +117,21 @@ function undo(name) {
   return names;
 }
 
+
 const corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:3001/vendredi-musique-front', 'https://qbreton.github.io']
 };
 
 app.use(cors());
 
+app.use('/draw', expressjwt({secret : process.env.JWT_SECRET, algorithms: ['HS256']}));
 app.get('/draw', (req, res) => {
   const list = drawWinner();
   res.json(list);
 });
 
+// We block access to post names for unauthorized users
+app.use('/names', expressjwt({secret : process.env.JWT_SECRET, algorithms: ['HS256']}).unless({ method: ['GET'] }));
 app.get('/names', (req, res) => {
     const { notDrawn, drawn } = getDrawnAndNotDrawn();
     res.json({ notDrawn, drawn });
@@ -140,18 +147,38 @@ app.post('/names', jsonParser, (req, res) => {
     }
 });
 
+app.use('/names/:name', expressjwt({secret : process.env.JWT_SECRET, algorithms: ['HS256']}));
 app.delete('/names/:name', (req, res) => {
   res.json(deleteNames(req.params.name))
 });
 
+app.use('/:name/undo', expressjwt({secret : process.env.JWT_SECRET, algorithms: ['HS256']}));
 app.post('/:name/undo', (req, res) => {
   res.json(undo(req.params.name))
 });
 
+app.use('/reset', expressjwt({secret : process.env.JWT_SECRET, algorithms: ['HS256']}));
 app.post('/reset', (req, res) => {
   const { notDrawn, drawn } = resetNames();
   res.json({ notDrawn, drawn });
 });
+
+app.post('/login', jsonParser, (req, res) => {
+  // Récupérer les identifiants d'utilisateur envoyés via la requête POST
+  const { username, password } = req.body;
+
+  // Vérifier si l'utilisateur est un admin
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+      // Si les identifiants sont valides, générer un token d'authentification
+      const token = jwt.sign({ username: username }, process.env.JWT_SECRET);
+
+      // Retourner le token d'authentification
+      res.status(200).json({ token: token });
+  } else {
+      // Sinon, retourner un message d'erreur
+      res.status(401).json({ message: "Invalid credentials" });
+  }
+})
 
 app.listen(port, () => {
   console.log(`API is running on port ${port}`);
