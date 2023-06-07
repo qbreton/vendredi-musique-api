@@ -10,8 +10,10 @@ const jwt = require('jsonwebtoken');
 const { expressjwt } = require('express-jwt');
 const { compareSync } = require('bcryptjs');
 require('dotenv').config();
+
 const firebase = require('firebase-admin');
 const firebaseAccount = JSON.parse(process.env.FIREBASE);
+
 firebase.initializeApp({
   credential: firebase.credential.cert(firebaseAccount)
 });
